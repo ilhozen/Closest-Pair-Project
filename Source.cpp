@@ -124,24 +124,41 @@ int main() {
 		<< result.p2.x << ", " << result.p2.y << ")" << endl;
 	cout << "Distance: " << result.distance << endl;
 
-	sf::RenderWindow window(sf::VideoMode(1280, 720), "Closest Pair");
+	sf::RenderWindow window(sf::VideoMode(800, 800), "Closest Pairs");
+	sf::CircleShape point(1);
+	point.setFillColor(sf::Color::Color(255, 199, 0));
+	
+	double minX = DBL_MAX, minY = DBL_MAX, maxX = -DBL_MAX, maxY = -DBL_MAX;
+	for (const auto& p : points) {
+		if (p.x < minX) minX = p.x;
+		if (p.y < minY) minY = p.y;
+		if (p.x > maxX) maxX = p.x;
+		if (p.y > maxY) maxY = p.y;
+	}
 
-	sf::Font font;
-	if (!font.loadFromFile("Minecraftia-Regular.ttf"))
-		return EXIT_FAILURE;
-	sf::Text text("Hello World!", font, 24);
-	text.setPosition(352, 336);
+	double scale = min(750.0 / (maxX - minX), 750.0 / (maxY - minY));
 
-	sf::Event event;
-	while (window.isOpen())
-	{
-		while (window.pollEvent(event))
-		{
+	sf::Vector2f windowCenter(400, 400);
+
+	vector<sf::Vector2f> animPoints;
+	for (auto& p : points) {
+		double scaledX = (p.x) * scale;
+		double scaledY = (p.y) * scale;
+		animPoints.emplace_back(windowCenter.x + scaledX, windowCenter.y - scaledY);
+	}
+
+	while (window.isOpen()) {
+		sf::Event event;
+		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
-		window.clear();
-		window.draw(text);
+
+		window.clear(sf::Color::Color(0, 8, 16, 255));
+		for (const auto& p : animPoints) {
+			point.setPosition(p);
+			window.draw(point);
+		}
 		window.display();
 	}
 
