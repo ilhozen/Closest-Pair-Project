@@ -74,7 +74,7 @@ Result dacMerge(const vector<Point>& vec, int lo, int median, int hi, Result lef
 	rectangle.setFillColor(sf::Color(255, 240, 100, 32));
 	window.draw(rectangle);
 	window.display();
-	sf::sleep(sf::milliseconds(200));
+	sf::sleep(sf::milliseconds(100));
 
 
 	vector<Point> strip;
@@ -148,7 +148,7 @@ Result dacRecursive(const vector<Point>& vec, int lo, int hi, sf::RenderWindow& 
 	line[1].color = sf::Color::Red;
 	window.draw(line, 2, sf::Lines);
 	window.display();
-	sf::sleep(sf::milliseconds(200));
+	sf::sleep(sf::milliseconds(100));
 
 	Result left = dacRecursive(vec, lo, median, window, animPoints, point, scale);
 	Result right = dacRecursive(vec, median + 1, hi, window, animPoints, point, scale);
