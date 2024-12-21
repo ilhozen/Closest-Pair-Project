@@ -3,6 +3,9 @@
 #include <cmath>
 #include <cfloat>
 #include <algorithm>
+#include <fstream>
+#include <string>
+#include <sstream>
 using namespace std;
 
 struct Point {
@@ -32,39 +35,93 @@ Result naive(const vector<Point>& vec) {
 	return closestPair;
 }
 
-Result divideAndConquer(const vector<Point>& vec) {
+Result dacMerge(const vector<Point>& vec, int lo, int median, int hi, Result left, Result right) {
+	Result closestPair;
+	if (left.distance < right.distance) {
+		closestPair = left;
+	}
+	else {
+		closestPair = right;
+	}
+
+	vector<Point> strip;
+	double medianX = vec[median].x;
+	for (int i = lo; i <= hi; i++) {
+		if (fabs(vec[i].x - medianX) < closestPair.distance) {
+			strip.push_back(vec[i]);
+		}
+	}
+
+	sort(strip.begin(), strip.end(), [](const Point& a, const Point& b) {
+		return a.y < b.y;
+		});
+
+	for (int i = 0; i < strip.size(); i++) {
+		for (int j = i + 1; j < strip.size() && (strip[j].y - strip[i].y) < closestPair.distance; j++) {
+			double d = calculateDistance(strip[i], strip[j]);
+			if (d < closestPair.distance) {
+				closestPair.distance = d;
+				closestPair.p1 = strip[i];
+				closestPair.p2 = strip[j];
+			}
+		}
+	}
+
+	return closestPair;
+}
+
+Result dacRecursive(const vector<Point>& vec, int lo, int hi) {
+	Result closestPair;
+	if (hi - lo == 1) {
+		closestPair.p1 = vec[lo];
+		closestPair.p2 = vec[hi];
+		closestPair.distance = calculateDistance(vec[lo], vec[hi]);
+		return closestPair;
+	}
+	if (hi - lo == 0) {
+		closestPair.p1 = vec[lo];
+		closestPair.p2 = vec[lo];
+		//Default distance is max
+		return closestPair;
+	}
+	int median = (lo + hi) / 2;
+	Result left = dacRecursive(vec, lo, median);
+	Result right = dacRecursive(vec, median + 1, hi);
+	return dacMerge(vec, lo, median, hi, left, right);
+}
+
+Result divideAndConquer(const vector<Point>& unsortedVec) {
+	vector<Point> vec = unsortedVec;
 	sort(vec.begin(), vec.end(), [](const Point& a, const Point& b) {
 		return a.x < b.x;
 		});
-	return divAndConRecursive(vec);
-}
-
-Result divAndConRecursive(const vector<Point>& vec, int lo, int hi) {
-	if (lo >= hi) {
-		return;
-	}
-	int median = (lo + hi) / 2;
-
-
+	return dacRecursive(vec, 0, (vec.size() - 1));
 }
 
 int main() {
+	string line;
+	double x, y;
+	vector<Point> points;
+	ifstream pointFile("points_.txt");
 
+	if (!pointFile.is_open()) {
+		cout << "Unable to open file." << endl;
+		return 0;
+	}
 
+	while (getline(pointFile, line)) {
+		stringstream pointStream(line);
+		if (pointStream >> x >> y) {
+			Point p({ x, y });
+			points.push_back(p);
+		}
+	}
 
-	/*vector<Point> points = {
-		{0.0, 0.0},
-		{1.0, 1.0},
-		{2.0, 2.0},
-		{1.0, 0.0},
-		{0.7, 0.5}
-	};
-
-	Result result = naive(points);
+	Result result = divideAndConquer(points);
 
 	cout << "Closest Pair: (" << result.p1.x << ", " << result.p1.y << ") and ("
 		<< result.p2.x << ", " << result.p2.y << ")" << endl;
-	cout << "Distance: " << result.distance << endl;*/
+	cout << "Distance: " << result.distance << endl;
 
 	return 0;
 }
