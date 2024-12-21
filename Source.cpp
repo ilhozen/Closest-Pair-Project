@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <SFML/Graphics.hpp>
 using namespace std;
 
 struct Point {
@@ -122,6 +123,27 @@ int main() {
 	cout << "Closest Pair: (" << result.p1.x << ", " << result.p1.y << ") and ("
 		<< result.p2.x << ", " << result.p2.y << ")" << endl;
 	cout << "Distance: " << result.distance << endl;
+
+	sf::RenderWindow window(sf::VideoMode(1280, 720), "Closest Pair");
+
+	sf::Font font;
+	if (!font.loadFromFile("Minecraftia-Regular.ttf"))
+		return EXIT_FAILURE;
+	sf::Text text("Hello World!", font, 24);
+	text.setPosition(352, 336);
+
+	sf::Event event;
+	while (window.isOpen())
+	{
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+		}
+		window.clear();
+		window.draw(text);
+		window.display();
+	}
 
 	return 0;
 }
